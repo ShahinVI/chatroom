@@ -19,6 +19,27 @@ def establish_connection():
     sock.bind((host, port))
     return sock
 
+def broadcast(message):
+
+
+def handle_clients(conn, address):
+    name = conn.recv(1024).decode
+    welcome = "Welcome "+name+". You can type #quit if you ever want to leave the Chat Room"
+    conn.recv(bytes(welcome, "utf8"))
+    msg = name + "has joined the chat room"
+    broadcast(bytes(msg),"utf8")
+    clients[conn] = name
+
+    while True:
+        msg= conn.recv(1024)
+        if msg!=bytes("#quit","utf8"):
+            broadcast(msg, name+":")
+        else:
+            conn.semd(bytes("#quit","utf8"))
+            conn.close()
+            del clients[conn]
+            broadcast(bytes(name+" has left the chat room"))
+
 def listen_accept_connection(sock):
     while True:
 
@@ -27,9 +48,10 @@ def listen_accept_connection(sock):
         client_conn, client_address = sock.accept()
         print(client_address," has connected")
         client_conn.send("\nWelcome to the ChatRomm, \nPlease Type your name to continue".encode('utf8'))
-        addresses[client_conn]=client_address
-        if client_conn:
-            return client_conn, client_address
+
+        addresses[client_conn] = client_address
+
+        Thread(target = handle_clients, args=(client_conn, client_address)).start()
 
 def send_message(client_conn,message):
     # send message over the coonnection
