@@ -19,8 +19,9 @@ def establish_connection():
     sock.bind((host, port))
     return sock
 
-def broadcast(message):
-
+def broadcast(msg,prefix=""):
+    for x in clients:
+        x.send(bytes(prefix, "utf8")+msg)
 
 def handle_clients(conn, address):
     name = conn.recv(1024).decode
