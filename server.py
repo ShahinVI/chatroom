@@ -1,4 +1,6 @@
 import socket
+from threading import Thread
+
 #################################################
 host = '127.0.0.1'                              #
 port = 8080                                     #
@@ -19,21 +21,27 @@ def establish_connection():
 
 def listen_accept_connection(sock):
     while True:
-        # listening 5 request at one time for simplicity
-        sock.listen(5)
-        print("server is running and listening to clients request\n")
+
         # when connection establish use sock.accept
         # this gives back connection and address
-        conn, address = sock.accept()
-        if conn:
-            return conn, address
+        client_conn, client_address = sock.accept()
+        print(client_address," has connected")
+        client_conn.send("\nWelcome to the ChatRomm, \nPlease Type your name to continue".encode('utf8'))
+        addresses[client_conn]=client_address
+        if client_conn:
+            return client_conn, client_address
 
-def send_message(sock,message):
+def send_message(client_conn,message):
     # send message over the coonnection
-    conn.send(message.encode())
+    client_conn.send(message.encode())
 
 if __name__=="__main__":
+
     sock = establish_connection()
-    conn, address = listen_accept_connection(sock)
-    send_message(sock, message)
-    conn.close()
+    # listening 5 request at one time for simplicity
+    sock.listen(5)
+    print("server is running and listening to clients request\n")
+
+    t1 = Thread(target=listen_accept_connection)
+    t1.start()
+    t1.join()
