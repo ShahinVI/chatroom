@@ -65,6 +65,6 @@ if __name__=="__main__":
     sock.listen(5)
     print("server is running and listening to clients request\n")
 
-    t1 = Thread(target=listen_accept_connection)
+    t1 = Thread(target=listen_accept_connection(sock))
     t1.start()
     t1.join()
