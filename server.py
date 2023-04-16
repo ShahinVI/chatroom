@@ -24,22 +24,24 @@ def broadcast(msg,prefix=""):
         x.send(bytes(prefix, "utf8")+msg)
 
 def handle_clients(conn, address):
-    name = conn.recv(1024).decode
+    name = conn.recv(1024).decode()
     welcome = "Welcome "+name+". You can type #quit if you ever want to leave the Chat Room"
-    conn.recv(bytes(welcome, "utf8"))
+    conn.send(bytes(welcome, "utf8"))
     msg = name + "has joined the chat room"
-    broadcast(bytes(msg),"utf8")
+    broadcast(bytes(msg,"utf8"))
     clients[conn] = name
 
     while True:
-        msg= conn.recv(1024)
-        if msg!=bytes("#quit","utf8"):
+        msg = conn.recv(1024)
+        if msg != bytes("#quit", "utf8"):
             broadcast(msg, name+":")
         else:
-            conn.semd(bytes("#quit","utf8"))
+            conn.send(bytes("#quit", "utf8"))
             conn.close()
             del clients[conn]
-            broadcast(bytes(name+" has left the chat room"))
+            broadcast(bytes(name+" has left the chat room", "utf8"))
+            print("connection closed with "+name)
+            break
 
 def listen_accept_connection(sock):
     while True:
@@ -59,12 +61,11 @@ def send_message(client_conn,message):
     client_conn.send(message.encode())
 
 if __name__=="__main__":
-
     sock = establish_connection()
     # listening 5 request at one time for simplicity
     sock.listen(5)
     print("server is running and listening to clients request\n")
 
-    t1 = Thread(target=listen_accept_connection(sock))
+    t1 = Thread(target=listen_accept_connection, args=(sock,))
     t1.start()
     t1.join()
